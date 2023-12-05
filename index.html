@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8' />
+  <title>SIGNS OF NYC</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='../d3.js'></script>
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.min.js'></script>
+  <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.2/mapbox-gl-directions.js'></script>
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.2/mapbox-gl-directions.css' type='text/css' />
+  <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css' type='text/css' />
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; padding:0; }
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    }
+    h4{ margin: 4px;}
+    p{  
+        font-size: 12px;
+        font-style: italic
+    }
+    #map { position:absolute; top:0; bottom:0; width:100%; height: 100;}
+    #language-controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.143);
+        padding: 10px 40px;
+        border-radius: 5px;
+        z-index: 2;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    #language-controls label {
+        display: block; /* 使每个标签占据一行 */
+        margin-bottom: 2px; /* 可选：添加一些间隔 */
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    
+</style>
+</head>
+
+<body>
+    <div id='map'></div>
+    <div id='language-controls'>
+        <h2>SIGNS OF NYC</h2>
+        <p>Show/hide the sign content, language, category 
+            <br>on the map by checking the boxes below
+            <br>Dataset: Google Street Images
+        </p>
+        <h4>Sign Content</h4>
+        <label><input type="checkbox" class="content-toggle" checked> Show Content</label>
+        <h4>Sign Language</h4>
+        <label><input type="checkbox" class="language-toggle" checked> All Languages</label>
+        <label><input type="checkbox" class="language-checkbox" value="English" checked> English</label>
+        <label><input type="checkbox" class="language-checkbox" value="Spanish" checked> Spanish</label>
+        <label><input type="checkbox" class="language-checkbox" value="Chinese" checked> Chinese</label>
+        <label><input type="checkbox" class="language-checkbox" value="Italian" checked> Italian</label>
+        <label><input type="checkbox" class="language-checkbox" value="French" checked> French</label>
+        <label><input type="checkbox" class="language-checkbox" value="Korean" checked> Korean</label>
+        <label><input type="checkbox" class="language-checkbox" value="Russian" checked> Russian</label>
+        <label><input type="checkbox" class="language-checkbox" value="Bengail" checked> Bengail</label>
+        <label><input type="checkbox" class="language-checkbox" value="Haitian Creole" checked> Haitian Creole</label>
+        <hr>
+        <h4>Sign Category</h4>
+        <label><input type="checkbox" class="category-toggle" checked> All Categories</label>
+        <label><input type="checkbox" class="category-checkbox" value="brand sign" checked> Brand Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="street name sign" checked> Street Name Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="building information sign" checked> Building Information Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="bus stop sign" checked> Bus Stop Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="parking regulation sign" checked> Parking Regulation Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="scaffold sign" checked> Scaffold Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="one way sign" checked> One Way Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="advertising sign" checked> Advertising Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="for lease sign" checked> For Leasen Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="do not enter sign" checked> Do Not Enter Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="speed limit sign" checked> Speed Limit Sign Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="promotion sign" checked> Promotion Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="direction sign" checked> Direction Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="subway sign" checked> Subway Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="touristic sign" checked> Touristic Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="shop information sign" checked> Shop Information Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="street close sign" checked> Street Close Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="school crossing sign" checked> School Crossing Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="all traffic sign" checked> All Traffic Sign</label>
+        <label><input type="checkbox" class="category-checkbox" value="dont block sign" checked> Don't Block Sign</label>
+    </div>
+<script>
+
+//this part of the example can be found at mapbox: https://docs.mapbox.com/mapbox-gl-js/example/simple-map/
+//you will find the accessToken and the style for your map under "Share" in your specific map in mapbox studio
+mapboxgl.accessToken = 'pk.eyJ1IjoiaG9uZ3FpYW5saSIsImEiOiJjbGticW84cjIwaGRjM2xvNjNrMjh4cmRyIn0.o65hBMiuqrCXY-3-bxGsUg';
+var map = new mapboxgl.Map({
+  container: 'map',//thi sis the div that you have mad above in html that you are now placing your map in
+  style: 'mapbox://styles/hongqianli/clkz0gnx000lw01p7375xf0qf',//you will find the accessToken under "Share" in your specific map in mapbox studio
+  center: [-74, 40.8],//the center of the map can be set to any initial value of [lng,lat]
+  zoom: 11//note that some layers have zoom limits - for example, streets and building footprints are not visible when zoomed out
+});
+
+
+d3.json("Data/crops_final_data_10.geojson")
+            .then(function(data) {
+                map.on('load', function () {
+                    var languageCounts = countLanguages(data.features);
+                    var languageColors = {
+                    'English': '#CA3AB0',
+                    'Spanish': '#d53e4f',
+                    'Chinese': '#f46d43',
+                    'Italian': '#fee08b',
+                    'French': '#abdda4',
+                    'Korean': '#5733FF',
+                    'Russian': '#66c2a5',
+                    'Bengail': '#3288bd',
+                    'Haitian Creole': '#5e4fa2'
+                    };
+                    drawLanguageMarkers(data.features, languageCounts, languageColors);
+
+                    var categoryCounts = countCategories(data.features);
+                    var categoryColors = {
+                        'brand sign': '#53ef3f',
+                        'street name sign': '#c3d621',
+                        'building information sign': '#0b2741',
+                        'bus stop sign': '#821237',
+                        'parking regulation sign': '#77f95d',
+                        'scaffold sign': '#004c45',
+                        'one way sign': '#a12947',
+                        'advertising sign': '#66433b',
+                        'for lease sign': '#4b455c',
+                        'do not enter sign': '#32be3e',
+                        'speed limit sign': '#961f73',
+                        'promotion sign': '#8be337',
+                        'direction sign': '#ecf60d',
+                        'subway sign': '#eaae6b',
+                        'touristic sign': '#a77be0',
+                        'shop information sign': '#d128f1',
+                        'street close sign': '#fe9353',
+                        'school crossing sign': '#5512d9',
+                        'all traffic sign': '#a16f67',
+                        'dont block sign': '#6f4e62',
+                    };
+                    drawCategoryMarkers(data.features, categoryCounts, categoryColors);
+                    drawContentMarkers(data.features); 
+                });
+            });
+
+        function countLanguages(features) {
+            var counts = {};
+            features.forEach(function(feature) {
+                var language = feature.properties['Language-full'];
+                counts[language] = (counts[language] || 0) + 1;
+            });
+            return counts;
+        }
+
+        function drawLanguageMarkers(features, languageCounts, languageColors) {
+    // 按语言分组特征
+    var featuresByLanguage = {};
+    features.forEach(function(feature) {
+        var language = feature.properties['Language-full'];
+        if (!featuresByLanguage[language]) {
+            featuresByLanguage[language] = [];
+        }
+        featuresByLanguage[language].push(feature);
+    });
+
+    // 为每种语言创建一个图层
+    Object.keys(featuresByLanguage).forEach(function(language) {
+        var count = languageCounts[language];
+        var size = Math.min(4 + count, 16);
+        var color = languageColors[language];
+
+        map.addLayer({
+            "id": "language-" + language,
+            "type": "symbol",
+            "source": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": featuresByLanguage[language]
+                }
+            },
+            "layout": {
+                "text-field": language,
+                "text-font": ["Roboto Bold", "Arial Unicode MS Bold"],
+                "text-size": size,
+                "text-anchor": "left", 
+                "text-offset": [0.4, 0] 
+            },
+            "paint": {
+                "text-color": color
+            }
+        });
+    });
+}
+
+        function countCategories(features) {
+            var counts = {};
+            features.forEach(function(feature) {
+                var category = feature.properties['Category'];
+                counts[category] = (counts[category] || 0) + 1;
+            });
+            return counts;
+        }
+
+        function drawCategoryMarkers(features, categoryCounts, categoryColors) {
+            var featuresByCategory = {};
+            features.forEach(function(feature) {
+                var category = feature.properties['Category'];
+                if (!featuresByCategory[category]) {
+                    featuresByCategory[category] = [];
+                }
+                featuresByCategory[category].push(feature);
+            });
+
+            Object.keys(featuresByCategory).forEach(function(category) {
+                var count = categoryCounts[category];
+                var size = Math.min(4 + count, 16);
+                var color = categoryColors[category];
+
+                map.addLayer({
+                    "id": "category-" + category,
+                    "type": "symbol",
+                    "source": {
+                        "type": "geojson",
+                        "data": {
+                            "type": "FeatureCollection",
+                            "features": featuresByCategory[category]
+                        }
+                    },
+                    "layout": {
+                        "text-field": category,
+                        "text-font": ["Roboto Bold", "Arial Unicode MS Bold"],
+                        "text-size": size,
+                        "text-anchor": "left",
+                        "text-offset": [0.4, 0]
+                    },
+                    "paint": {
+                        "text-color": color
+                    }
+                });
+            });
+        }
+
+        function drawContentMarkers(features) {
+    // 根据您的数据结构实现图层绘制逻辑
+    // 例如：
+    map.addLayer({
+        "id": "content",
+        "type": "symbol",
+        "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": features
+            }
+        },
+        "layout": {
+            "text-field": "{Content}",
+            "text-font": ["Roboto Bold", "Arial Unicode MS Bold"],
+            "text-size": 8,
+            "text-anchor": "left", 
+            "text-offset": [0.4, 0],
+            "text-max-width": 40 
+        },
+        "paint": {
+            "text-color": "#ffffff"
+            }
+    });
+}
+
+// 假设您有另一个GeoJSON线数据存储在名为 "lineData.geojson" 的文件中
+d3.json("Data/broadway.geojson")
+    .then(function(lineData) {
+        map.addLayer({
+            "id": "line-layer",
+            "type": "line", // 指定图层类型为线图层
+            "source": {
+                "type": "geojson",
+                "data": lineData
+            },
+            "layout": {
+                // 根据您的需求设置布局属性
+            },
+            "paint": {
+                "line-color": "#B6B6B4", // 设置线的颜色
+                "line-width": 1 // 设置线的宽度
+            }
+        });
+    });
+
+// 添加事件监听以处理复选框的变化
+function toggleLayerVisibility(layerId, isVisible) {
+    var visibility = isVisible ? 'visible' : 'none';
+    map.setLayoutProperty(layerId, 'visibility', visibility);
+}
+
+document.querySelector('.content-toggle').addEventListener('change', function() {
+    toggleLayerVisibility("content", this.checked); // 切换 "Content" 图层的可见性
+});
+
+document.querySelector('.language-toggle').addEventListener('change', function() {
+    var checked = this.checked;
+    document.querySelectorAll('.language-checkbox').forEach(function(checkbox) {
+        checkbox.checked = checked;
+        var layerId = "language-" + checkbox.value;
+        toggleLayerVisibility(layerId, checked);
+    });
+});
+
+document.querySelector('.category-toggle').addEventListener('change', function() {
+    var checked = this.checked;
+    document.querySelectorAll('.category-checkbox').forEach(function(checkbox) {
+        checkbox.checked = checked;
+        var layerId = "category-" + checkbox.value;
+        toggleLayerVisibility(layerId, checked);
+    });
+});
+
+document.querySelectorAll('.language-checkbox, .category-checkbox').forEach(function(checkbox) {
+    checkbox.addEventListener('change', function() {
+        var layerId = (checkbox.classList.contains('language-checkbox') ? "language-" : "category-") + checkbox.value;
+        toggleLayerVisibility(layerId, checkbox.checked);
+    });
+});
+
+</script>
+</body>
+</html>
+
