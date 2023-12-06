@@ -12,20 +12,35 @@
   <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.0.2/mapbox-gl-directions.css' type='text/css' />
   <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.4.2/mapbox-gl-geocoder.css' type='text/css' />
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+  
   <style>
-    body { margin:0; padding:0; }
-    * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
     }
-    h4{ margin: 4px;}
-    p{  
+    
+    h4 {
+        margin: 4px;
+    }
+    
+    p {
         font-size: 12px;
-        font-style: italic
+        font-style: italic;
     }
-    #map { position:absolute; top:0; bottom:0; width:100%; height: 100;}
+    
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100;
+    }
+    #large-container {
+        display: flex;
+        justify-content: space-between;
+    }
     #language-controls {
         position: absolute;
         top: 10px;
@@ -38,17 +53,57 @@
         font-family: Arial, Helvetica, sans-serif;
     }
     #language-controls label {
-        display: block; /* 使每个标签占据一行 */
-        margin-bottom: 2px; /* 可选：添加一些间隔 */
+        display: block;
+        margin-bottom: 2px;
         font-size: 12px;
         font-family: Arial, Helvetica, sans-serif;
     }
     
-</style>
+    #treemap-container {
+        position: relative;
+        top: 10px;
+        right: 0px;
+        width: 360px;
+        height: 220px;
+        z-index: 2;
+    }
+    #category-treemap-container {
+        position: relative;
+        top: 10px;
+        right: 5px;
+        width: 360px;
+        height: 2200px;
+        z-index: 2;
+    }
+    #treemap {
+        position: absolute;
+        top: 5px;
+        right: 0px;
+        width: 360px;
+        height: 600px;
+        background: rgba(255, 255, 255, 0.143);
+        padding: 10px 40px;
+        border-radius: 5px;
+        z-index: 2;
+        color: white;
+        padding: 10px;
+    }
+    #tooltip {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        background-color: white;
+        border: solid 1px black;
+        padding: 5px;
+        transition: opacity 0.3s;
+        z-index: 10;
+    }
+    </style>
 </head>
 
 <body>
     <div id='map'></div>
+    <div id="large-container">
     <div id='language-controls'>
         <h2>SIGNS OF NYC</h2>
         <p>Show/hide the sign content, language, category 
@@ -57,6 +112,7 @@
         </p>
         <h4>Sign Content</h4>
         <label><input type="checkbox" class="content-toggle" checked> Show Content</label>
+        <hr>
         <h4>Sign Language</h4>
         <label><input type="checkbox" class="language-toggle" checked> All Languages</label>
         <label><input type="checkbox" class="language-checkbox" value="English" checked> English</label>
@@ -92,6 +148,16 @@
         <label><input type="checkbox" class="category-checkbox" value="all traffic sign" checked> All Traffic Sign</label>
         <label><input type="checkbox" class="category-checkbox" value="dont block sign" checked> Don't Block Sign</label>
     </div>
+    <div id="treemap">
+    <h4>Sign Language Treemap</h4>
+    <div id="treemap-container"></div>
+    <hr>
+    <h4>Sign Category Treemap</h4>
+    <div id="category-treemap-container"></div>
+</div>
+</div>
+    
+    
 <script>
 
 //this part of the example can be found at mapbox: https://docs.mapbox.com/mapbox-gl-js/example/simple-map/
@@ -100,8 +166,10 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiaG9uZ3FpYW5saSIsImEiOiJjbGticW84cjIwaGRjM2xvN
 var map = new mapboxgl.Map({
   container: 'map',//thi sis the div that you have mad above in html that you are now placing your map in
   style: 'mapbox://styles/hongqianli/clkz0gnx000lw01p7375xf0qf',//you will find the accessToken under "Share" in your specific map in mapbox studio
-  center: [-74, 40.8],//the center of the map can be set to any initial value of [lng,lat]
-  zoom: 11//note that some layers have zoom limits - for example, streets and building footprints are not visible when zoomed out
+  center: [-73.96, 40.79],//the center of the map can be set to any initial value of [lng,lat]
+  zoom: 11.05,//note that some layers have zoom limits - for example, streets and building footprints are not visible when zoomed out
+pitch: 0, // 设置倾斜角度
+bearing: 30 
 });
 
 
@@ -249,8 +317,6 @@ d3.json("Data/crops_final_data_10.geojson")
         }
 
         function drawContentMarkers(features) {
-    // 根据您的数据结构实现图层绘制逻辑
-    // 例如：
     map.addLayer({
         "id": "content",
         "type": "symbol",
@@ -294,6 +360,140 @@ d3.json("Data/broadway.geojson")
             }
         });
     });
+
+d3.json("Data/crops_final_data_10.geojson").then(data => {
+    // 计算每种语言的出现次数
+    const languageCounts = data.features.reduce((acc, feature) => {
+        const language = feature.properties['Language-full'];
+        acc[language] = (acc[language] || 0) + 1;
+        return acc;
+    }, {});
+
+    // 创建 TreeMap 需要的数据结构
+    const treeData = {
+        name: "Languages",
+        children: Object.keys(languageCounts).map(key => ({
+            name: key,
+            value: languageCounts[key]
+        }))
+    };
+
+    // 设置 TreeMap 的尺寸
+    const width = 360;
+    const height = 200;
+    const color = d3.scaleOrdinal(d3.schemeCategory10); // 定义颜色比例尺
+
+    // 创建一个根节点
+    const root = d3.hierarchy(treeData)
+        .sum(d => d.value) // 使用 value 作为节点的大小
+        .sort((a, b) => b.value - a.value);
+
+    // 应用 TreeMap 布局
+    d3.treemap()
+        .size([width, height])
+        .padding(1)
+        (root);
+
+    // 创建 SVG 元素
+    const svg = d3.select("#treemap-container").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .style("font", "8px sans-serif");
+
+        const leaf = svg.selectAll("g")
+    .data(root.leaves())
+    .join("g")
+    .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+// 添加矩形
+leaf.append("rect")
+    .attr("fill", d => color(d.data.name))
+    .attr("width", d => d.x1 - d.x0)
+    .attr("height", d => d.y1 - d.y0);
+
+// 添加文本
+leaf.append("text")
+    .attr("x", 1)
+    .attr("y", 10)
+    .text(d => `${d.data.name}\n(${d.data.value})`);
+
+    d3.json("Data/crops_final_data_10.geojson").then(data => {
+    // 计算每种分类的出现次数
+    const categoryCounts = data.features.reduce((acc, feature) => {
+        const category = feature.properties['Category'];
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+    }, {});
+
+    // 创建 TreeMap 需要的数据结构
+    const categoryTreeData = {
+        name: "Categories",
+        children: Object.keys(categoryCounts).map(key => ({
+            name: key,
+            value: categoryCounts[key]
+        }))
+    };
+
+    // 设置 TreeMap 的尺寸
+    const categoryWidth = 360;
+    const categoryHeight = 200;
+
+    // 创建一个根节点
+    const categoryRoot = d3.hierarchy(categoryTreeData)
+        .sum(d => d.value)
+        .sort((a, b) => b.value - a.value);
+
+    // 应用 TreeMap 布局
+    d3.treemap()
+        .size([categoryWidth, categoryHeight])
+        .padding(1)
+        (categoryRoot);
+
+    // 创建另一个 SVG 元素用于分类 TreeMap
+    const categorySvg = d3.select("#category-treemap-container").append("svg")
+    .attr("width", categoryWidth)
+    .attr("height", categoryHeight)
+    .style("font", "8px sans-serif");
+
+
+    // 绘制每个节点
+    const categoryLeaf = categorySvg.selectAll("g")
+        .data(categoryRoot.leaves())
+        .join("g")
+        .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+    // 添加矩形
+    categoryLeaf.append("rect")
+        .attr("fill", d => color(d.data.name))
+        .attr("width", d => d.x1 - d.x0)
+        .attr("height", d => d.y1 - d.y0);
+
+    // 添加文本
+    categoryLeaf.append("text")
+        .attr("x", 1)
+        .attr("y", 10)
+        .text(d => `${d.data.name}\n(${d.data.value})`);
+});
+
+
+
+// Tooltip 相关代码
+const tooltip = d3.select("#tooltip");
+
+// 修改 mouseover 事件处理函数
+leaf.on("mouseover", function(event, d) {
+    // 确保 d 和 d.data 都是定义的
+    if (d && d.data) {
+        tooltip.style("opacity", 1)
+            .html("Language: " + d.data.name + "<br>Count: " + d.data.value)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY + 10) + "px");
+    }
+})
+.on("mouseout", function() {
+    tooltip.style("opacity", 0);
+});
+});
 
 // 添加事件监听以处理复选框的变化
 function toggleLayerVisibility(layerId, isVisible) {
