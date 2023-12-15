@@ -1,0 +1,268 @@
+body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+    }
+    
+    h4 {
+        margin: 4px;
+    }
+    
+    p {
+        font-size: 12px;
+        font-style: italic;
+    }
+    
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100;
+    }
+    #large-container {
+        display: flex;
+        justify-content: space-between;
+    }
+    #language-controls {
+        position: relative;
+        top: 10px;
+        left: 10px;
+        background: rgba(255, 255, 255, 0.143);
+        padding: 10px 40px;
+        border-radius: 5px;
+        z-index: 2;
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    #language-controls label {
+        display: block;
+        margin-bottom: 2px;
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    #treemap-container {
+        position: relative;
+        top: 10px;
+        right: 0px;
+        width: 360px;
+        height: 220px;
+        z-index: 2;
+    }
+    #category-treemap-container {
+        position: relative;
+        top: 10px;
+        right: 5px;
+        width: 360px;
+        height: 220px;
+        z-index: 2;
+    }
+    #wordcloud-treemap-container {
+        position: relative;
+        top: 10px;
+        right: 5px;
+        width: 360px;
+        height: 220px;
+        z-index: 2;
+    }
+    #treemap {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 360px;
+        height: 750px;
+        background: rgba(255, 255, 255, 0.143);
+        padding: 10px 40px;
+        border-radius: 5px;
+        z-index: 2;
+        color: white;
+        padding: 10px 30px;
+    }
+
+#treemap-toggle-button {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: transparent; /* 无底色 */
+    color: white; /* 白色箭头 */
+    border: none; /* 无边框 */
+    cursor: pointer;
+}
+
+.collapsed-right {
+    transform: translateX(100%); /* 向右收缩 */
+}
+
+    #tooltip {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        background-color: white;
+        border: solid 1px black;
+        padding: 5px;
+        transition: opacity 0.3s;
+        z-index: 10;
+    }
+
+    .language-checkbox input[type="checkbox"] {
+        display: none; /* 隐藏原生复选框 */
+    }
+    
+    .language-checkbox label {
+        position: relative;
+        padding-left: 20px; /* 留出空间放置自定义复选框图标 */
+    }
+    
+    .language-checkbox label:before {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border: 0.5px solid #ddd;
+        border-radius: 0px;
+        background-color: white; /* 默认背景颜色为白色 */
+    }
+    
+    /* 根据不同语言设置选中状态的背景颜色 */
+    .language-checkbox .english:checked + label:before { background-color: #e81e63; }
+    .language-checkbox .spanish:checked + label:before { background-color: #8bc34a; }
+    .language-checkbox .chinese:checked + label:before { background-color: #3f51b5; }
+    .language-checkbox .italian:checked + label:before { background-color: #00bcd4; }
+    .language-checkbox .french:checked + label:before { background-color: #009688; }
+    .language-checkbox .korean:checked + label:before { background-color: #cddc39; }
+    .language-checkbox .russian:checked + label:before { background-color: #ffc107; }
+    .language-checkbox .bengail:checked + label:before { background-color: #ff9800; }
+    .language-checkbox .haitian-creole:checked + label:before { background-color: #ff5722; }
+
+
+    
+    .category-checkbox input[type="checkbox"] {
+        display: none; /* 隐藏原生复选框 */
+    }
+    
+    .category-checkbox label {
+        position: relative;
+        padding-left: 20px; /* 留出空间放置自定义复选框图标 */
+    }
+    
+    .category-checkbox label:before {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border: 0.5px solid #ddd;
+        border-radius: 0px;
+        background-color: white; /* 默认背景颜色为白色 */
+    }
+
+    .category-checkbox .brand-sign:checked + label:before { background-color: #e81e63; }
+    .category-checkbox .street-name-sign:checked + label:before { background-color: #9c27b0; }
+    .category-checkbox .building-information-sign:checked + label:before { background-color: #3f51b5; }
+    .category-checkbox .bus-stop-sign:checked + label:before { background-color: #03a9f4; }
+    .category-checkbox .parking-regulation-sign:checked + label:before { background-color: #00bcd4; }
+    .category-checkbox .scaffold-sign:checked + label:before { background-color: #009688; }
+    .category-checkbox .one-way-sign:checked + label:before { background-color: #8bc34a; }
+    .category-checkbox .advertising-sign:checked + label:before { background-color: #cddc39; }
+    .category-checkbox .for-lease-sign:checked + label:before { background-color: #ffc107; }
+    .category-checkbox .do-not-enter-sign:checked + label:before { background-color: #ff9800; }
+    .category-checkbox .speed-limit-sign:checked + label:before { background-color: #ff5722; }
+    .category-checkbox .promotion-sign:checked + label:before { background-color: #795548; }
+    .category-checkbox .direction-sign:checked + label:before { background-color: #9e9e9e; }
+    .category-checkbox .subway-sign:checked + label:before { background-color: #607d8b; }
+    .category-checkbox .touristic-sign:checked + label:before { background-color: #a77be0; }
+    .category-checkbox .shop-information-sign:checked + label:before { background-color: #d128f1; }
+    .category-checkbox .street-close-sign:checked + label:before { background-color: #fe9353; }
+    .category-checkbox .school-crossing-sign:checked + label:before { background-color: #5512d9; }
+    .category-checkbox .all-traffic-sign:checked + label:before { background-color: #a16f67; }
+    .category-checkbox .dont-block-sign:checked + label:before { background-color: #6f4e62; }
+
+ /* 隐藏原生复选框 */
+ .category-toggle, .language-toggle, .content-toggle {
+    display: none;
+}
+
+/* 样式化自定义复选框 */
+.category-toggle + label, .language-toggle + label, .content-toggle + label {
+    position: relative;
+    padding-left: 20px; /* 留出足够的空间放置复选框图标 */
+    cursor: pointer;
+    font-size: 12px; /* 设置文字大小 */
+}
+
+/* 创建自定义复选框的方框 */
+.category-toggle + label:before, .language-toggle + label:before, .content-toggle + label:before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px; /* 方框宽度 */
+    height: 12px; /* 方框高度 */
+    border: 0.5px solid #ddd;
+    background-color: white; /* 默认背景色 */
+}
+
+/* 当复选框被选中时的样式 */
+.category-toggle:checked + label:before, .language-toggle:checked + label:before, .content-toggle:checked + label:before {
+    background-color: black; /* 选中时的背景色 */
+}
+
+/* 为选中状态添加勾 */
+.category-toggle:checked + label:after, .language-toggle:checked + label:after, .content-toggle:checked + label:after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white; /* 勾的颜色 */
+    font-size: 10px; /* 勾的大小 */
+}
+
+
+#large-container, #treemap {
+    position: relative; /* 用于定位内部的按钮 */
+}
+
+#language-controls, #treemap {
+    transition: transform 0.5s ease-out; /* 平滑过渡效果 */
+    /* 可以根据需要调整 transform 属性，控制收缩程度 */
+}
+
+#toggle-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: transparent; /* 使按钮无底色 */
+    color: white; /* 设置箭头为白色 */
+    border: none; /* 移除边框 */
+    cursor: pointer;
+}
+
+.collapsed {
+    /* 根据需要调整 transform 的值，减少收缩程度 */
+    transform: translateX(-95%); /* 例如，只收缩一半 */
+}
+
+#treemap-toggle-button {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: transparent; /* 无底色 */
+    color: white; /* 白色箭头 */
+    border: none; /* 无边框 */
+    cursor: pointer;
+    z-index: 100;
+}
+
+.collapsed-right {
+    transform: translateX(96%); /* 向右收缩 */
+}
