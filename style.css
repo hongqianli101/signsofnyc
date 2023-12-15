@@ -3,6 +3,7 @@ body {
         padding: 0;
         box-sizing: border-box;
         font-family: Arial, sans-serif;
+        overflow: hidden;
     }
     
     h4 {
@@ -19,7 +20,8 @@ body {
         top: 0;
         bottom: 0;
         width: 100%;
-        height: 100;
+        height: 100%;
+        z-index: 1;
     }
     #large-container {
         display: flex;
@@ -243,7 +245,6 @@ body {
     background-color: transparent; /* 使按钮无底色 */
     color: white; /* 设置箭头为白色 */
     border: none; /* 移除边框 */
-    cursor: pointer;
 }
 
 .collapsed {
@@ -259,8 +260,6 @@ body {
     background-color: transparent; /* 无底色 */
     color: white; /* 白色箭头 */
     border: none; /* 无边框 */
-    cursor: pointer;
-    z-index: 100;
 }
 
 .collapsed-right {
